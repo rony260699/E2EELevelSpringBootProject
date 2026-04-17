@@ -1,7 +1,9 @@
 package com.dalgo.SpringBoot.Controller;
 
 import com.dalgo.SpringBoot.Entity.JournalEntry;
+import com.dalgo.SpringBoot.Entity.Users;
 import com.dalgo.SpringBoot.Service.JournalEntryService;
+import com.dalgo.SpringBoot.Service.UserService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,10 +23,23 @@ public class JournalEntryControllerV2 {
     @Autowired
     private JournalEntryService journalEntryService;
 
-    // get all document
-    @GetMapping
-    public List<JournalEntry> getAll(){
-        return journalEntryService.getAll();
+    @Autowired
+    private UserService userService;
+//    // get all document
+//    @GetMapping
+//    public List<JournalEntry> getAll(){
+//        return journalEntryService.getAll();
+//    }
+
+    /// get all document
+    @GetMapping("{userName}")
+    public ResponseEntity<?> getAllJournalEntriesByUser(@PathVariable String userName){
+        Users user = userService.getbyusername(userName);
+        List<JournalEntry> allJournalsOfUser =  user.getUsersJournalEntries();
+        if(allJournalsOfUser != null && !allJournalsOfUser.isEmpty()){
+            return new ResponseEntity<>(allJournalsOfUser, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
 // ///////////////////////////
@@ -36,11 +51,12 @@ public class JournalEntryControllerV2 {
 //        return true;
 //    }
 
-    @PostMapping
-    public ResponseEntity<JournalEntry> addEntries(@RequestBody JournalEntry je){
+    @PostMapping("{userName}")
+    public ResponseEntity<JournalEntry> addEntries(@RequestBody JournalEntry je, @PathVariable String userName){
+        Users user = userService.getbyusername(userName);
         try{
             je.setDate(LocalDateTime.now());
-            journalEntryService.saveEntry(je);
+            journalEntryService.saveEntry(je, user);
             return new ResponseEntity<>(je, HttpStatus.CREATED);
         }catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -73,14 +89,15 @@ public class JournalEntryControllerV2 {
 //        return journalEntryService.deletebyid(myid);
 //    }
 
-    @DeleteMapping("id/{myid}")
-    public ResponseEntity<?> dletejournal(@PathVariable ObjectId myid){
-        journalEntryService.deletebyid(myid);
+    @DeleteMapping("id/{userName}/{myid}")
+    public ResponseEntity<?> dletejournal(@PathVariable String userName, @PathVariable ObjectId myid){
+        journalEntryService.deletebyid(userName, myid);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 // ////////////////////////
 
     // Update Document
+    // video 16 er updating part ta kora hoyni
     @PutMapping("id/{myid}")
     public ResponseEntity<?> updatejournal(@PathVariable ObjectId myid, @RequestBody JournalEntry je){
         JournalEntry newje = journalEntryService.updatebyid(myid, je.getContent(), je.getTitle());

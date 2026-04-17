@@ -18,6 +18,7 @@ public class UserEntryController {
     @Autowired
     private UserService userService;
 
+    //Create any user
     @PostMapping
     public ResponseEntity<Users> createUsers(@RequestBody Users user){
         try{
@@ -29,6 +30,7 @@ public class UserEntryController {
 
     }
 
+    // Get All users
     @GetMapping
     public ResponseEntity<?> getusers(){
         List<Users> userList = userService.getAll();
@@ -36,6 +38,7 @@ public class UserEntryController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    // get user by id
     @GetMapping("id/{userid}")
     public ResponseEntity<?> getUserByID(@PathVariable ObjectId userid){
         Optional<Users> user = userService.getbyid(userid);
@@ -43,6 +46,15 @@ public class UserEntryController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    // get user by name
+    @GetMapping("/getbyname")
+    public ResponseEntity<?> getUserByName(@RequestBody String username){
+        Users temp = userService.getbyusername(username);
+        if(temp != null) return new ResponseEntity<>(temp, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    // update user by id
     @PutMapping("id/{userid}")
     public ResponseEntity<?> updateUser(@PathVariable ObjectId userid,@RequestBody Users user){
         if(userService.updatebyid(userid, user)) return new ResponseEntity<>(user, HttpStatus.RESET_CONTENT);
@@ -50,6 +62,7 @@ public class UserEntryController {
 
     }
 
+    // delete user by id
     @DeleteMapping("id/{userid}")
     public ResponseEntity<?> deleteUser(@PathVariable ObjectId userid){
         if(userService.deletebyid(userid)) return new ResponseEntity<>(HttpStatus.NO_CONTENT);

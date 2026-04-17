@@ -19,9 +19,11 @@ public class Users {
 
     @Id
     private ObjectId id;
+
+    private LocalDateTime date;
+
     @Indexed(unique = true) // But eta automatic indexing korbe na.
                             // Application properties a giye " spring.data.mongodb.auto.index-creation=true " eta dite hobe
-    private LocalDateTime date;
     @NonNull
     private String userName;
     @NonNull
